@@ -149,7 +149,7 @@ const options: EventSourceOptions = {
 
 ## 🚀 Advanced usage with TypeScript
 
-Using EventSource you can handle custom events invoked by server:
+Using EventSource you can handle custom events invoked by the server:
 
 ```typescript
 import EventSource from "react-native-sse";
@@ -188,7 +188,7 @@ export interface CustomEvent<E extends string> {
 
 ## 👏 Contribution
 
-If you see our library is not working properly, feel free to open issue or create pull request with your fixes.
+If you see our library is not working properly, feel free to open an issue or create a pull request with your fixes.
 
 ## 📄 License
 

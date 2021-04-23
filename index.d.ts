@@ -19,6 +19,10 @@ export interface CloseEvent {
   type: 'close';
 }
 
+export interface TimeoutEvent {
+  type: 'timeout';
+}
+
 export interface ErrorEvent {
   type: 'error';
   message: string;
@@ -46,7 +50,7 @@ export interface EventSourceOptions {
   pollingInterval?: number;
 }
 
-export type EventSourceEvent = MessageEvent | OpenEvent | CloseEvent | ErrorEvent | ExceptionEvent;
+export type EventSourceEvent = MessageEvent | OpenEvent | CloseEvent | TimeoutEvent | ErrorEvent | ExceptionEvent;
 
 export type EventSourceListener<E extends string = never> = (
   event: CustomEvent<E> | EventSourceEvent
