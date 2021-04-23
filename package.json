@@ -1,0 +1,27 @@
+{
+  "name": "react-native-sse",
+  "version": "1.0.0",
+  "description": "EventSource implementation for React Native. Server-Sent Events (SSE) for iOS and Android.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/binaryminds/react-native-sse.git"
+  },
+  "keywords": [
+    "react-native",
+    "event-source",
+    "sse",
+    "server-sent-events",
+    "ios",
+    "android"
+  ],
+  "author": "BinaryMinds",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/binaryminds/react-native-sse/issues"
+  },
+  "homepage": "https://github.com/binaryminds/react-native-sse#readme"
+}
