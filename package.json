@@ -1,6 +1,6 @@
 {
   "name": "react-native-sse",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "EventSource implementation for React Native. Server-Sent Events (SSE) for iOS and Android.",
   "main": "index.js",
   "scripts": {
