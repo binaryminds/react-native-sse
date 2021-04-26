@@ -1,4 +1,4 @@
-# React Native EventSource (SSE) 🚀
+# React Native EventSource (Server-Sent Events) 🚀
 
 Your missing EventSource implementation for React Native! React-Native-SSE library supports TypeScript.
 
@@ -19,6 +19,8 @@ npm install --save react-native-sse
 ```
 
 ## 🎉  Usage
+
+We are using Server-Sent Events as a convenient way of establishing and handling Mercure connections. It helps us keep data always up-to-date, synchronize data between devices, and improve real-time workflow. Here you have some usage examples:
 
 ### Import
 
@@ -58,7 +60,7 @@ If you want to use Bearer token and/or topics, look at this example (TypeScript)
 
 ```typescript
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import EventSource, { EventSourceListener } from "react-native-sse";
 import "react-native-url-polyfill/auto"; // Use URL polyfill in React Native
 
