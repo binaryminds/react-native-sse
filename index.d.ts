@@ -57,7 +57,7 @@ export type EventSourceListener<E extends string = never> = (
 ) => void;
 
 declare class EventSource<E extends string = never> {
-  constructor(url: URL | string, options?: EventSourceOptions);
+  constructor(url: URL | string, options?: EventSourceOptions = {});
   open(): void;
   close(): void;
   addEventListener(type: E | EventType, listener: EventSourceListener<E>): void;

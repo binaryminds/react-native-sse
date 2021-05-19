@@ -4,7 +4,7 @@ class EventSource {
   OPEN = 1;
   CLOSED = 2;
 
-  constructor(url, options) {
+  constructor(url, options = {}) {
     this.interval = options.pollingInterval || 5000;
     this.lastEventId = null;
     this.lastIndexProcessed = 0;
@@ -209,11 +209,17 @@ class EventSource {
   }
 
   addEventListener(type, listener) {
+    if (this.eventHandlers[type] === undefined) {
+      this.eventHandlers[type] = [];
+    }
+    
     this.eventHandlers[type].push(listener);
   }
 
   removeEventListener(type, listener) {
-    this.eventHandlers[type] = this.eventHandlers[type].filter((handler) => handler !== listener);
+    if (this.eventHandlers[type] !== undefined) {
+      this.eventHandlers[type] = this.eventHandlers[type].filter((handler) => handler !== listener);
+    }
   }
 
   removeAllEventListeners(type) {
