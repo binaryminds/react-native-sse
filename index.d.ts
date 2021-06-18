@@ -33,6 +33,8 @@ export interface ErrorEvent {
 export interface CustomEvent<E extends string> {
   type: E;
   data: string | null;
+  lastEventId: string | null;
+  url: string;
 }
 
 export interface ExceptionEvent {

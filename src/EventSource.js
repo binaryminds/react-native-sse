@@ -183,23 +183,15 @@ class EventSource {
         this.lastEventId = null;
       } else if (line === '') {
         if (data.length > 0) {
-          if (this.eventType !== undefined) {
-            const event = {
-              type: this.eventType,
-              data: data.join('\n'),
-            };
+          const eventType = this.eventType || 'message'
+          const event = {
+            type: eventType,
+            data: data.join("\n"),
+            url: this.url,
+            lastEventId: this.lastEventId,
+          };
 
-            this.dispatch(this.eventType, event);
-          } else {
-            const event = {
-              type: 'message',
-              data: data.join('\n'),
-              url: this.url,
-              lastEventId: this.lastEventId,
-            };
-
-            this.dispatch('message', event);
-          }
+          this.dispatch(eventType, event);
 
           data = [];
           this.eventType = undefined;
