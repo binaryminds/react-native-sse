@@ -2,7 +2,7 @@
 
 Your missing EventSource implementation for React Native! React-Native-SSE library supports TypeScript.
 
-## 🪄 Installation
+## 💿 Installation
 
 We use XMLHttpRequest to establish and handle an SSE connection, so you don't need an additional native Android and iOS implementation. It's easy, just install it with your favorite package manager:
 
@@ -18,7 +18,7 @@ yarn add react-native-sse
 npm install --save react-native-sse
 ```
 
-## 🎉  Usage
+## 🎉 Usage
 
 We are using Server-Sent Events as a convenient way of establishing and handling Mercure connections. It helps us keep data always up-to-date, synchronize data between devices, and improve real-time workflow. Here you have some usage examples:
 
@@ -185,6 +185,8 @@ Custom events always emit result with following interface:
 export interface CustomEvent<E extends string> {
   type: E;
   data: string | null;
+  lastEventId: string | null;
+  url: string;
 }
 ```
 
