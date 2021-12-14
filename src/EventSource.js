@@ -161,7 +161,9 @@ class EventSource {
 
   _handleEvent(response) {
     const parts = response.substr(this.lastIndexProcessed).split('\n');
-    this.lastIndexProcessed = response.lastIndexOf('\n\n') + 2;
+    if (response.includes('\n\n')) {
+      this.lastIndexProcessed = response.lastIndexOf('\n\n') + 2;
+    }
     let data = [];
     let retry = 0;
     let line = '';
