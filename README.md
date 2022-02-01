@@ -130,6 +130,73 @@ const BookList: React.FC = () => {
 export default BookList;
 ```
 
+## ⚠️ Warning (for react-redux)
+
+When you call a function to handle a new event like this: `es.addEventListener('message', handleMessage);` and
+the `handleMessage` function use a `useCallback`:
+```typescript
+// in your component
+const someData = useSelector(
+    (state: RootState) => state.globalState.someData,
+);
+
+const handleMessage: EventSourceListener = React.useCallback(
+  (event: any) => {
+      console.log(someData); // will always be initial value
+  },
+  [someData],
+);
+```
+
+`someData` will always be the initial value of when the component has been loaded, even if you change the value
+of `someData` somewhere else in the code with a `dispatch`.
+
+A solution to this problem is to use `someData` directly in
+a [reducer](https://redux.js.org/usage/configuring-your-store/#enhancersmonitorreducerjs). Like this.
+
+```typescript
+// in your component
+const someData = useSelector(
+    (state: RootState) => state.globalState.someData,
+);
+
+const handleMessage: EventSourceListener = React.useCallback(
+  (event: any) => {
+      console.log(someData);
+      dispatch(updateSomeData());
+  },
+  [someData],
+);
+```
+```typescript
+// in the reducer
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+
+export interface GlobalState {
+    someData?: any;
+}
+
+export const initialState: GlobalState = {
+    someData: undefined,
+};
+
+export const globalSlice = createSlice({
+    name: 'appReducers',
+    initialState,
+    reducers: {
+        updateSomeData: (state) => {
+            console.log(state.someData); // real value of someData
+        },
+    },
+});
+
+export const {
+    updateSomeData,
+} = globalSlice.actions;
+
+export default globalSlice.reducer;
+```
+
 ## 📖 Configuration
 
 ```typescript
