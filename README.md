@@ -132,69 +132,47 @@ export default BookList;
 
 ## ⚠️ Warning (for react-redux)
 
-When you call a function to handle a new event like this: `es.addEventListener('message', handleMessage);` and
-the `handleMessage` function use a `useCallback`:
-```typescript
-// in your component
-const someData = useSelector(
-    (state: RootState) => state.globalState.someData,
-);
+Since the listener is a closure it has access only to the component values from the first render. Each subsequent render
+has no effect on already defined listeners.
 
-const handleMessage: EventSourceListener = React.useCallback(
-  (event: any) => {
-      console.log(someData); // will always be initial value
-  },
-  [someData],
-);
-```
-
-`someData` will always be the initial value of when the component has been loaded, even if you change the value
-of `someData` somewhere else in the code with a `dispatch`.
-
-A solution to this problem is to use `someData` directly in
-a [reducer](https://redux.js.org/usage/configuring-your-store/#enhancersmonitorreducerjs). Like this.
+If you use Redux you can get the actual value directly from the store instance.
 
 ```typescript
-// in your component
-const someData = useSelector(
-    (state: RootState) => state.globalState.someData,
-);
+// full example: https://snack.expo.dev/@quiknull/react-native-sse-redux-example
+const Example: React.FC = () => {
+    const userName = useSelector((state: RootState) => state.user.name);
 
-const handleMessage: EventSourceListener = React.useCallback(
-  (event: any) => {
-      console.log(someData);
-      dispatch(updateSomeData());
-  },
-  [someData],
-);
-```
-```typescript
-// in the reducer
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-
-export interface GlobalState {
-    someData?: any;
-}
-
-export const initialState: GlobalState = {
-    someData: undefined,
-};
-
-export const globalSlice = createSlice({
-    name: 'appReducers',
-    initialState,
-    reducers: {
-        updateSomeData: (state) => {
-            console.log(state.someData); // real value of someData
+    const pingHandler: EventSourceListener = useCallback(
+        (event) => {
+            // In Event Source Listeners in connection with redux
+            // you should read state directly from store object.
+            console.log("User name from component selector: ", userName); // bad
+            console.log("User name directly from store: ", store.getState().user.name); // good
         },
-    },
-});
+        [userName]
+    );
 
-export const {
-    updateSomeData,
-} = globalSlice.actions;
+    useEffect(() => {
+        const token = "myToken";
+        const url = new URL("https://demo.mercure.rocks/.well-known/mercure");
+        url.searchParams.append(
+            "topic",
+            "https://example.com/my-private-topic"
+        );
 
-export default globalSlice.reducer;
+        const es = new EventSource(url, {
+            headers: {
+                Authorization: {
+                    toString: function () {
+                        return "Bearer " + token;
+                    }
+                }
+            }
+        });
+
+        es.addEventListener("ping", pingHandler);
+    }, []);
+};
 ```
 
 ## 📖 Configuration
