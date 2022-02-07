@@ -130,51 +130,6 @@ const BookList: React.FC = () => {
 export default BookList;
 ```
 
-## ⚠️ Warning (for react-redux)
-
-Since the listener is a closure it has access only to the component values from the first render. Each subsequent render
-has no effect on already defined listeners.
-
-If you use Redux you can get the actual value directly from the store instance.
-
-```typescript
-// full example: https://snack.expo.dev/@quiknull/react-native-sse-redux-example
-const Example: React.FC = () => {
-    const userName = useSelector((state: RootState) => state.user.name);
-
-    const pingHandler: EventSourceListener = useCallback(
-        (event) => {
-            // In Event Source Listeners in connection with redux
-            // you should read state directly from store object.
-            console.log("User name from component selector: ", userName); // bad
-            console.log("User name directly from store: ", store.getState().user.name); // good
-        },
-        [userName]
-    );
-
-    useEffect(() => {
-        const token = "myToken";
-        const url = new URL("https://demo.mercure.rocks/.well-known/mercure");
-        url.searchParams.append(
-            "topic",
-            "https://example.com/my-private-topic"
-        );
-
-        const es = new EventSource(url, {
-            headers: {
-                Authorization: {
-                    toString: function () {
-                        return "Bearer " + token;
-                    }
-                }
-            }
-        });
-
-        es.addEventListener("ping", pingHandler);
-    }, []);
-};
-```
-
 ## 📖 Configuration
 
 ```typescript
@@ -233,6 +188,51 @@ export interface CustomEvent<E extends string> {
   lastEventId: string | null;
   url: string;
 }
+```
+
+## Usage with React Redux
+
+Since the listener is a closure it has access only to the component values from the first render. Each subsequent render
+has no effect on already defined listeners.
+
+If you use Redux you can get the actual value directly from the store instance.
+
+```typescript
+// full example: https://snack.expo.dev/@quiknull/react-native-sse-redux-example
+const Example: React.FC = () => {
+    const userName = useSelector((state: RootState) => state.user.name);
+
+    const pingHandler: EventSourceListener = useCallback(
+        (event) => {
+            // In Event Source Listeners in connection with redux
+            // you should read state directly from store object.
+            console.log("User name from component selector: ", userName); // bad
+            console.log("User name directly from store: ", store.getState().user.name); // good
+        },
+        [userName]
+    );
+
+    useEffect(() => {
+        const token = "myToken";
+        const url = new URL("https://demo.mercure.rocks/.well-known/mercure");
+        url.searchParams.append(
+            "topic",
+            "https://example.com/my-private-topic"
+        );
+
+        const es = new EventSource(url, {
+            headers: {
+                Authorization: {
+                    toString: function () {
+                        return "Bearer " + token;
+                    }
+                }
+            }
+        });
+
+        es.addEventListener("ping", pingHandler);
+    }, []);
+};
 ```
 
 ## 👏 Contribution
