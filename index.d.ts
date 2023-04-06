@@ -50,6 +50,7 @@ export interface EventSourceOptions {
   body?: any;
   debug?: boolean;
   pollingInterval?: number;
+  timeoutBeforeConnection?: number;
 }
 
 export type EventSourceEvent = MessageEvent | OpenEvent | CloseEvent | TimeoutEvent | ErrorEvent | ExceptionEvent;
