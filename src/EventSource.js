@@ -23,6 +23,7 @@ class EventSource {
     this.headers = options.headers || {};
     this.body = options.body || undefined;
     this.debug = options.debug || false;
+    this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
 
     this._xhr = null;
     this._pollTimer = null;
@@ -37,7 +38,7 @@ class EventSource {
       this.url = url;
     }
 
-    this._pollAgain(500);
+    this._pollAgain(this.timeoutBeforeConnection);
   }
 
   _pollAgain(time) {
