@@ -187,6 +187,7 @@ new EventSource(url: string | URL, options?: EventSourceOptions);
 const options: EventSourceOptions = {
   method: 'GET'; // Request method. Default: GET
   timeout: 0; // Time after which the connection will expire without any activity: Default: 0 (no timeout)
+  timeoutBeforeConnection: 500; // Time to wait before initial connection is made: Default: 500ms
   headers: {}; // Your request headers. Default: {}
   body: undefined; // Your request body sent on connection: Default: undefined
   debug: false; // Show console.debug messages for debugging purpose. Default: false
