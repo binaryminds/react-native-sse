@@ -1,46 +1,38 @@
-export type EventType = 'open' | 'message' | 'error' | 'close';
-
-export interface BaseEvent {
-  type: string;
+export type Events = {
+  message: {
+    type: 'message';
+    data: string | null;
+    lastEventId: string | null;
+    url: string;
+  };
+  open: {
+    type: 'open';
+  };
+  close: {
+    type: 'close';
+  };
+  timeout: {
+    type: 'timeout';
+  };
+  error: {
+    type: 'error';
+    message: string;
+    xhrState: number;
+    xhrStatus: number;
+  } | {
+    type: 'exception';
+    message: string;
+    error: Error;
+  };
 }
 
-export interface MessageEvent {
-  type: 'message';
-  data: string | null;
-  lastEventId: string | null;
-  url: string;
-}
-
-export interface OpenEvent {
-  type: 'open';
-}
-
-export interface CloseEvent {
-  type: 'close';
-}
-
-export interface TimeoutEvent {
-  type: 'timeout';
-}
-
-export interface ErrorEvent {
-  type: 'error';
-  message: string;
-  xhrState: number;
-  xhrStatus: number;
-}
+export type EventType = keyof Events;
 
 export interface CustomEvent<E extends string> {
   type: E;
   data: string | null;
   lastEventId: string | null;
   url: string;
-}
-
-export interface ExceptionEvent {
-  type: 'exception';
-  message: string;
-  error: Error;
 }
 
 export interface EventSourceOptions {
@@ -53,20 +45,18 @@ export interface EventSourceOptions {
   timeoutBeforeConnection?: number;
 }
 
-export type EventSourceEvent = MessageEvent | OpenEvent | CloseEvent | TimeoutEvent | ErrorEvent | ExceptionEvent;
-
-export type EventSourceListener<E extends string = never> = (
-  event: CustomEvent<E> | EventSourceEvent
+export type EventSourceListener<E extends EventType | string> = (
+  event: E extends EventType ? Events[E] : CustomEvent<E>
 ) => void;
 
-declare class EventSource<E extends string = never> {
+declare class EventSource<E extends EventType = EventType> {
   constructor(url: URL | string, options?: EventSourceOptions);
   open(): void;
   close(): void;
-  addEventListener(type: E | EventType, listener: EventSourceListener<E>): void;
-  removeEventListener(type: E | EventType, listener: EventSourceListener<E>): void;
-  removeAllEventListeners(type?: E | EventType): void;
-  dispatch(type: E | EventType, data: E | EventSourceEvent): void;
+  addEventListener<T extends (E | EventType)>(type: T, listener: EventSourceListener<T>): void;
+  removeEventListener<T extends (E | EventType)>(type: T, listener: EventSourceListener<T>): void;
+  removeAllEventListeners<T extends (E | EventType)>(type?: T): void;
+  dispatch<T extends (E | EventType)>(type: T, data: T extends EventType ? Events[T] : CustomEvent<T>): void;
 }
 
 export default EventSource;
