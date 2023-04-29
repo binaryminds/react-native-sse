@@ -49,7 +49,7 @@ export type EventSourceListener<E extends EventType | string> = (
   event: E extends EventType ? Events[E] : CustomEvent<E>
 ) => void;
 
-declare class EventSource<E extends EventType = EventType> {
+declare class EventSource<E extends EventType | string = EventType> {
   constructor(url: URL | string, options?: EventSourceOptions);
   open(): void;
   close(): void;
