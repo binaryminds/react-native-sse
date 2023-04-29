@@ -1,23 +1,17 @@
 class EventSource {
-  ERROR = -1;
-  CONNECTING = 0;
-  OPEN = 1;
-  CLOSED = 2;
+  static ERROR = -1;
+  static CONNECTING = 0;
+  static OPEN = 1;
+  static CLOSED = 2;
+
+  _eventHandlers = new Map();
 
   constructor(url, options = {}) {
     this.interval = options.pollingInterval || 5000;
     this.lastEventId = null;
     this.lastIndexProcessed = 0;
     this.eventType = undefined;
-    this.status = this.CONNECTING;
-
-    this.eventHandlers = {
-      open: [],
-      message: [],
-      error: [],
-      close: [],
-    };
-
+    this.status = EventSource.CONNECTING;
     this.method = options.method || 'GET';
     this.timeout = options.timeOut || 0;
     this.headers = options.headers || {};
@@ -50,7 +44,7 @@ class EventSource {
   open() {
     try {
       this.lastIndexProcessed = 0;
-      this.status = this.CONNECTING;
+      this.status = EventSource.CONNECTING;
 
       this._xhr = new XMLHttpRequest();
       this._xhr.open(this.method, this.url, true);
@@ -85,8 +79,8 @@ class EventSource {
         }
 
         if (xhr.status >= 200 && xhr.status < 400) {
-          if (this.status === this.CONNECTING) {
-            this.status = this.OPEN;
+          if (this.status === EventSource.CONNECTING) {
+            this.status = EventSource.OPEN;
             this.dispatch('open', { type: 'open' });
           }
 
@@ -100,7 +94,7 @@ class EventSource {
             }
             this._pollAgain(this.interval);
           }
-        } else if (this.status !== this.CLOSED) {
+        } else if (this.status !== EventSource.CLOSED) {
           if (this._xhr.status !== 0) {
             this.dispatch('error', {
               type: 'error',
@@ -123,7 +117,7 @@ class EventSource {
       };
 
       this._xhr.onerror = (e) => {
-        this.status === this.ERROR;
+        this.status === EventSource.ERROR;
 
         this.dispatch('error', {
           type: 'error',
@@ -151,7 +145,7 @@ class EventSource {
         }, this.timeout);
       }
     } catch (e) {
-      this.status = this.ERROR;
+      this.status = EventSource.ERROR;
       this.dispatch('error', {
         type: 'exception',
         message: e.message,
@@ -202,49 +196,39 @@ class EventSource {
   }
 
   addEventListener(type, listener) {
-    if (this.eventHandlers[type] === undefined) {
-      this.eventHandlers[type] = [];
+    if (!this._eventHandlers.has(type)) {
+      this._eventHandlers.set(type, new Set());
     }
     
-    this.eventHandlers[type].push(listener);
+    this._eventHandlers.get(type).add(listener);
   }
 
   removeEventListener(type, listener) {
-    if (this.eventHandlers[type] !== undefined) {
-      this.eventHandlers[type] = this.eventHandlers[type].filter((handler) => handler !== listener);
-    }
+    this._eventHandlers.get(type)?.delete(listener);
   }
 
   removeAllEventListeners(type) {
-    const availableTypes = Object.keys(this.eventHandlers);
-
     if (type === undefined) {
-      for (const eventType of availableTypes) {
-        this.eventHandlers[eventType] = [];
-      }
+      this._eventHandlers = new Map();
     } else {
-      if (!availableTypes.includes(type)) {
-        throw Error(`[EventSource] '${type}' type is not supported event type.`);
+      if (!this._eventHandlers.delete(type)) {
+        throw Error(`[EventSource] '${type}' has no listeners attached.`);
       }
-
-      this.eventHandlers[type] = [];
     }
   }
 
   dispatch(type, data) {
-    const availableTypes = Object.keys(this.eventHandlers);
+    const handlers = this._eventHandlers.get(type);
 
-    if (!availableTypes.includes(type)) {
-      return;
-    }
-
-    for (const handler of Object.values(this.eventHandlers[type])) {
-      handler(data);
+    if(handlers){
+      handlers.forEach(handler => {
+        handler(data);
+      });
     }
   }
 
   close() {
-    this.status = this.CLOSED;
+    this.status = EventSource.CLOSED;
     clearTimeout(this._pollTimer);
     if (this._xhr) {
       this._xhr.abort();

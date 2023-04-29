@@ -50,6 +50,11 @@ export type EventSourceListener<E extends EventType | string> = (
 ) => void;
 
 declare class EventSource<E extends EventType = EventType> {
+  static ERROR = -1;
+  static CONNECTING = 0;
+  static OPEN = 1;
+  static CLOSED = 2;
+  status: number;
   constructor(url: URL | string, options?: EventSourceOptions);
   open(): void;
   close(): void;
