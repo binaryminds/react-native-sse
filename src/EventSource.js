@@ -19,11 +19,11 @@ class EventSource {
     };
 
     this.method = options.method || 'GET';
-    this.timeout = options.timeOut || 0;
+    this.timeout = options.timeout || 0;
     this.headers = options.headers || {};
     this.body = options.body || undefined;
     this.debug = options.debug || false;
-    this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
+    // this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
 
     this._xhr = null;
     this._pollTimer = null;
@@ -38,14 +38,15 @@ class EventSource {
       this.url = url;
     }
 
-    this._pollAgain(this.timeoutBeforeConnection);
+    // this._pollAgain(this.timeoutBeforeConnection);
+    this.open();
   }
 
-  _pollAgain(time) {
-    this._pollTimer = setTimeout(() => {
-      this.open();
-    }, time);
-  }
+  // _pollAgain(time) {
+  //   this._pollTimer = setTimeout(() => {
+  //     this.open();
+  //   }, time);
+  // }
 
   open() {
     try {
@@ -98,7 +99,7 @@ class EventSource {
                 '[EventSource][onreadystatechange][DONE] Operation done. Reconnecting...'
               );
             }
-            this._pollAgain(this.interval);
+            // this._pollAgain(this.interval);
           }
         } else if (this.status !== this.CLOSED) {
           if (this._xhr.status !== 0) {
@@ -117,7 +118,7 @@ class EventSource {
               );
             }
 
-            this._pollAgain(this.interval);
+            // this._pollAgain(this.interval);
           }
         }
       };
