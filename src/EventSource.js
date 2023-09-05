@@ -97,6 +97,7 @@ class EventSource {
           }
         } else if (this.status !== this.CLOSED) {
           if (this._xhr.status !== 0) {
+            this.status = this.ERROR;
             this.dispatch('error', {
               type: 'error',
               message: xhr.responseText,
@@ -112,9 +113,8 @@ class EventSource {
         }
       };
 
-      this._xhr.onerror = (e) => {
-        this.status === this.ERROR;
-
+      this._xhr.onerror = () => {
+        this.status = this.ERROR;
         this.dispatch('error', {
           type: 'error',
           message: this._xhr.responseText,
