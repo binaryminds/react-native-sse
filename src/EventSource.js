@@ -75,6 +75,10 @@ class EventSource {
       this._xhr.timeout = this.timeout;
 
       this._xhr.onreadystatechange = () => {
+        if (this.status === this.CLOSED) {
+          return;
+        }
+
         const xhr = this._xhr;
 
         this._logDebug(`[EventSource][onreadystatechange] ReadyState: ${xhr.readyState}, status: ${xhr.status}`);
@@ -95,16 +99,14 @@ class EventSource {
             this._logDebug('[EventSource][onreadystatechange][DONE] Operation done.');
             this._pollAgain(this.interval, false);
           }
-        } else if (this.status !== this.CLOSED) {
-          if (this._xhr.status !== 0) {
-            this.status = this.ERROR;
-            this.dispatch('error', {
-              type: 'error',
-              message: xhr.responseText,
-              xhrStatus: xhr.status,
-              xhrState: xhr.readyState,
-            });
-          }
+        } else if (xhr.status !== 0) {
+          this.status = this.ERROR;
+          this.dispatch('error', {
+            type: 'error',
+            message: xhr.responseText,
+            xhrStatus: xhr.status,
+            xhrState: xhr.readyState,
+          });
 
           if (xhr.readyState === XMLHttpRequest.DONE) {
             this._logDebug('[EventSource][onreadystatechange][ERROR] Response status error.');
@@ -114,6 +116,10 @@ class EventSource {
       };
 
       this._xhr.onerror = () => {
+        if (this.status === this.CLOSED) {
+          return;
+        }
+
         this.status = this.ERROR;
         this.dispatch('error', {
           type: 'error',
