@@ -132,10 +132,7 @@ class EventSource {
       if (this.timeout > 0) {
         setTimeout(() => {
           if (this._xhr.readyState === XMLHttpRequest.LOADING) {
-            this.dispatch('error', {
-              type: 'timeout',
-            });
-
+            this.dispatch('error', { type: 'timeout' });
             this.close();
           }
         }, this.timeout);
