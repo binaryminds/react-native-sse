@@ -18,12 +18,12 @@ class EventSource {
     };
 
     this.method = options.method || 'GET';
-    this.timeout = options.timeout || 0;
+    this.timeout = options.timeout ?? 0;
     this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
     this.headers = options.headers || {};
     this.body = options.body || undefined;
     this.debug = options.debug || false;
-    this.interval = options.pollingInterval || 5000;
+    this.interval = options.pollingInterval ?? 5000;
 
     this._xhr = null;
     this._pollTimer = null;
