@@ -19,7 +19,7 @@ class EventSource {
     };
 
     this.method = options.method || 'GET';
-    this.timeout = options.timeOut || 0;
+    this.timeout = options.timeout || 0;
     this.headers = options.headers || {};
     this.body = options.body || undefined;
     this.debug = options.debug || false;
