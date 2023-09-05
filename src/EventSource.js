@@ -74,11 +74,7 @@ class EventSource {
       this._xhr.onreadystatechange = () => {
         const xhr = this._xhr;
 
-        if (this.debug) {
-          console.debug(
-            `[EventSource][onreadystatechange] ReadyState: ${xhr.readyState}, status: ${xhr.status}`
-          );
-        }
+        this._logDebug(`[EventSource][onreadystatechange] ReadyState: ${xhr.readyState}, status: ${xhr.status}`);
 
         if (![XMLHttpRequest.DONE, XMLHttpRequest.LOADING].includes(xhr.readyState)) {
           return;
@@ -93,11 +89,7 @@ class EventSource {
           this._handleEvent(xhr.responseText || '');
 
           if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (this.debug) {
-              console.debug(
-                '[EventSource][onreadystatechange][DONE] Operation done. Reconnecting...'
-              );
-            }
+            this._logDebug('[EventSource][onreadystatechange][DONE] Operation done. Reconnecting...');
             this._pollAgain(this.interval);
           }
         } else if (this.status !== this.CLOSED) {
@@ -111,12 +103,7 @@ class EventSource {
           }
 
           if ([XMLHttpRequest.DONE, XMLHttpRequest.UNSENT].includes(xhr.readyState)) {
-            if (this.debug) {
-              console.debug(
-                '[EventSource][onreadystatechange][ERROR] Response status error. Reconnecting...'
-              );
-            }
-
+            this._logDebug('[EventSource][onreadystatechange][ERROR] Response status error. Reconnecting...');
             this._pollAgain(this.interval);
           }
         }
@@ -157,6 +144,12 @@ class EventSource {
         message: e.message,
         error: e,
       });
+    }
+  }
+
+  _logDebug(...msg) {
+    if (this.debug) {
+      console.debug(...msg);
     }
   }
 
