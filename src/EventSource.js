@@ -106,7 +106,7 @@ class EventSource {
             });
           }
 
-          if ([XMLHttpRequest.DONE, XMLHttpRequest.UNSENT].includes(xhr.readyState)) {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
             this._logDebug('[EventSource][onreadystatechange][ERROR] Response status error.');
             this._pollAgain(this.interval, false);
           }
