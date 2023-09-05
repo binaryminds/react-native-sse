@@ -191,7 +191,7 @@ const options: EventSourceOptions = {
   headers: {}; // Your request headers. Default: {}
   body: undefined; // Your request body sent on connection. Default: undefined
   debug: false; // Show console.debug messages for debugging purpose. Default: false
-  pollingInterval: 5000; // Time (ms) between reconnections. Default: 5000
+  pollingInterval: 5000; // Time (ms) between reconnections. If set to 0, reconnections will be disabled. Default: 5000
 }
 ```
 

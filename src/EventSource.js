@@ -38,13 +38,16 @@ class EventSource {
       this.url = url;
     }
 
-    this._pollAgain(this.timeoutBeforeConnection);
+    this._pollAgain(this.timeoutBeforeConnection, true);
   }
 
-  _pollAgain(time) {
-    this._pollTimer = setTimeout(() => {
-      this.open();
-    }, time);
+  _pollAgain(time, allowZero) {
+    if (time > 0 || allowZero) {
+      this._logDebug(`[EventSource] Will open new connection in ${time} ms.`);
+      this._pollTimer = setTimeout(() => {
+        this.open();
+      }, time);
+    }
   }
 
   open() {
@@ -89,8 +92,8 @@ class EventSource {
           this._handleEvent(xhr.responseText || '');
 
           if (xhr.readyState === XMLHttpRequest.DONE) {
-            this._logDebug('[EventSource][onreadystatechange][DONE] Operation done. Reconnecting...');
-            this._pollAgain(this.interval);
+            this._logDebug('[EventSource][onreadystatechange][DONE] Operation done.');
+            this._pollAgain(this.interval, false);
           }
         } else if (this.status !== this.CLOSED) {
           if (this._xhr.status !== 0) {
@@ -103,8 +106,8 @@ class EventSource {
           }
 
           if ([XMLHttpRequest.DONE, XMLHttpRequest.UNSENT].includes(xhr.readyState)) {
-            this._logDebug('[EventSource][onreadystatechange][ERROR] Response status error. Reconnecting...');
-            this._pollAgain(this.interval);
+            this._logDebug('[EventSource][onreadystatechange][ERROR] Response status error.');
+            this._pollAgain(this.interval, false);
           }
         }
       };
