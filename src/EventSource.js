@@ -198,7 +198,7 @@ class EventSource {
     if (this.eventHandlers[type] === undefined) {
       this.eventHandlers[type] = [];
     }
-    
+
     this.eventHandlers[type].push(listener);
   }
 
