@@ -5,7 +5,6 @@ class EventSource {
   CLOSED = 2;
 
   constructor(url, options = {}) {
-    this.interval = options.pollingInterval || 5000;
     this.lastEventId = null;
     this.lastIndexProcessed = 0;
     this.eventType = undefined;
@@ -20,10 +19,11 @@ class EventSource {
 
     this.method = options.method || 'GET';
     this.timeout = options.timeout || 0;
+    this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
     this.headers = options.headers || {};
     this.body = options.body || undefined;
     this.debug = options.debug || false;
-    this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
+    this.interval = options.pollingInterval || 5000;
 
     this._xhr = null;
     this._pollTimer = null;
