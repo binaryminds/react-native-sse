@@ -20,6 +20,7 @@ class EventSource {
     this.method = options.method || 'GET';
     this.timeout = options.timeout ?? 0;
     this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
+    this.withCredentials = options.withCredentials || false;
     this.headers = options.headers || {};
     this.body = options.body || undefined;
     this.debug = options.debug || false;
@@ -57,6 +58,10 @@ class EventSource {
 
       this._xhr = new XMLHttpRequest();
       this._xhr.open(this.method, this.url, true);
+
+      if (this.withCredentials) {
+        this._xhr.withCredentials = true;
+      }
 
       if (this.headers) {
         for (const [key, value] of Object.entries(this.headers)) {
