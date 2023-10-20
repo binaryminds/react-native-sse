@@ -1,3 +1,11 @@
+const XMLReadyStateMap = [
+  'UNSENT',
+  'OPENED',
+  'HEADERS_RECEIVED',
+  'LOADING',
+  'DONE',
+];
+
 class EventSource {
   ERROR = -1;
   CONNECTING = 0;
@@ -86,7 +94,7 @@ class EventSource {
 
         const xhr = this._xhr;
 
-        this._logDebug(`[EventSource][onreadystatechange] ReadyState: ${xhr.readyState}, status: ${xhr.status}`);
+        this._logDebug(`[EventSource][onreadystatechange] ReadyState: ${XMLReadyStateMap[xhr.readyState] || 'Unknown'}(${xhr.readyState}), status: ${xhr.status}`);
 
         if (![XMLHttpRequest.DONE, XMLHttpRequest.LOADING].includes(xhr.readyState)) {
           return;
@@ -96,6 +104,7 @@ class EventSource {
           if (this.status === this.CONNECTING) {
             this.status = this.OPEN;
             this.dispatch('open', { type: 'open' });
+            this._logDebug('[EventSource][onreadystatechange][OPEN] Connection opened.');
           }
 
           this._handleEvent(xhr.responseText || '');
@@ -166,10 +175,12 @@ class EventSource {
 
   _handleEvent(response) {
     const parts = response.substr(this.lastIndexProcessed).split('\n');
-    let indexOfDoubleNewline = response.lastIndexOf('\n\n');
+    
+    const indexOfDoubleNewline = response.lastIndexOf('\n\n');
     if (indexOfDoubleNewline != -1) {
       this.lastIndexProcessed = indexOfDoubleNewline + 2;
     }
+    
     let data = [];
     let retry = 0;
     let line = '';
