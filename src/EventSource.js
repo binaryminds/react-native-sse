@@ -71,15 +71,15 @@ class EventSource {
         this._xhr.withCredentials = true;
       }
 
+      this._xhr.setRequestHeader('Accept', 'text/event-stream');
+      this._xhr.setRequestHeader('Cache-Control', 'no-cache');
+      this._xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
       if (this.headers) {
         for (const [key, value] of Object.entries(this.headers)) {
           this._xhr.setRequestHeader(key, value);
         }
       }
-
-      this._xhr.setRequestHeader('Accept', 'text/event-stream');
-      this._xhr.setRequestHeader('Cache-Control', 'no-cache');
-      this._xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
       if (this.lastEventId !== null) {
         this._xhr.setRequestHeader('Last-Event-ID', this.lastEventId);
