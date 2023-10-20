@@ -58,7 +58,7 @@ type BuiltInEventMap = {
   'error': ErrorEvent | TimeoutEvent | ExceptionEvent,
 };
 
-type ResolvedEvent<E extends string, T extends EventType<E>> = T extends BuiltInEventType ? BuiltInEventMap[T] : CustomEvent<E>;
+type ResolvedEvent<E extends string, T extends EventType<E>> = T extends BuiltInEventType ? BuiltInEventMap[T] : CustomEvent<T>;
 
 export type EventSourceListener<E extends string = never, T extends EventType<E> = EventType<E>> = (
   event: ResolvedEvent<E, T>
