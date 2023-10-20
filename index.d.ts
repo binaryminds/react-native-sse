@@ -46,11 +46,12 @@ export interface ExceptionEvent {
 export interface EventSourceOptions {
   method?: string;
   timeout?: number;
+  timeoutBeforeConnection?: number;
+  withCredentials?: boolean;
   headers?: Record<string, any>;
   body?: any;
   debug?: boolean;
   pollingInterval?: number;
-  timeoutBeforeConnection?: number;
 }
 
 export type EventSourceEvent = MessageEvent | OpenEvent | CloseEvent | TimeoutEvent | ErrorEvent | ExceptionEvent;

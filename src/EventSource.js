@@ -5,7 +5,6 @@ class EventSource {
   CLOSED = 2;
 
   constructor(url, options = {}) {
-    this.interval = options.pollingInterval || 5000;
     this.lastEventId = null;
     this.lastIndexProcessed = 0;
     this.eventType = undefined;
@@ -19,11 +18,13 @@ class EventSource {
     };
 
     this.method = options.method || 'GET';
-    this.timeout = options.timeOut || 0;
+    this.timeout = options.timeout ?? 0;
+    this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
+    this.withCredentials = options.withCredentials || false;
     this.headers = options.headers || {};
     this.body = options.body || undefined;
     this.debug = options.debug || false;
-    this.timeoutBeforeConnection = options.timeoutBeforeConnection ?? 500;
+    this.interval = options.pollingInterval ?? 5000;
 
     this._xhr = null;
     this._pollTimer = null;
@@ -38,13 +39,16 @@ class EventSource {
       this.url = url;
     }
 
-    this._pollAgain(this.timeoutBeforeConnection);
+    this._pollAgain(this.timeoutBeforeConnection, true);
   }
 
-  _pollAgain(time) {
-    this._pollTimer = setTimeout(() => {
-      this.open();
-    }, time);
+  _pollAgain(time, allowZero) {
+    if (time > 0 || allowZero) {
+      this._logDebug(`[EventSource] Will open new connection in ${time} ms.`);
+      this._pollTimer = setTimeout(() => {
+        this.open();
+      }, time);
+    }
   }
 
   open() {
@@ -54,6 +58,10 @@ class EventSource {
 
       this._xhr = new XMLHttpRequest();
       this._xhr.open(this.method, this.url, true);
+
+      if (this.withCredentials) {
+        this._xhr.withCredentials = true;
+      }
 
       if (this.headers) {
         for (const [key, value] of Object.entries(this.headers)) {
@@ -72,13 +80,13 @@ class EventSource {
       this._xhr.timeout = this.timeout;
 
       this._xhr.onreadystatechange = () => {
+        if (this.status === this.CLOSED) {
+          return;
+        }
+
         const xhr = this._xhr;
 
-        if (this.debug) {
-          console.debug(
-            `[EventSource][onreadystatechange] ReadyState: ${xhr.readyState}, status: ${xhr.status}`
-          );
-        }
+        this._logDebug(`[EventSource][onreadystatechange] ReadyState: ${xhr.readyState}, status: ${xhr.status}`);
 
         if (![XMLHttpRequest.DONE, XMLHttpRequest.LOADING].includes(xhr.readyState)) {
           return;
@@ -93,38 +101,31 @@ class EventSource {
           this._handleEvent(xhr.responseText || '');
 
           if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (this.debug) {
-              console.debug(
-                '[EventSource][onreadystatechange][DONE] Operation done. Reconnecting...'
-              );
-            }
-            this._pollAgain(this.interval);
+            this._logDebug('[EventSource][onreadystatechange][DONE] Operation done.');
+            this._pollAgain(this.interval, false);
           }
-        } else if (this.status !== this.CLOSED) {
-          if (this._xhr.status !== 0) {
-            this.dispatch('error', {
-              type: 'error',
-              message: xhr.responseText,
-              xhrStatus: xhr.status,
-              xhrState: xhr.readyState,
-            });
-          }
+        } else if (xhr.status !== 0) {
+          this.status = this.ERROR;
+          this.dispatch('error', {
+            type: 'error',
+            message: xhr.responseText,
+            xhrStatus: xhr.status,
+            xhrState: xhr.readyState,
+          });
 
-          if ([XMLHttpRequest.DONE, XMLHttpRequest.UNSENT].includes(xhr.readyState)) {
-            if (this.debug) {
-              console.debug(
-                '[EventSource][onreadystatechange][ERROR] Response status error. Reconnecting...'
-              );
-            }
-
-            this._pollAgain(this.interval);
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+            this._logDebug('[EventSource][onreadystatechange][ERROR] Response status error.');
+            this._pollAgain(this.interval, false);
           }
         }
       };
 
-      this._xhr.onerror = (e) => {
-        this.status === this.ERROR;
+      this._xhr.onerror = () => {
+        if (this.status === this.CLOSED) {
+          return;
+        }
 
+        this.status = this.ERROR;
         this.dispatch('error', {
           type: 'error',
           message: this._xhr.responseText,
@@ -142,10 +143,7 @@ class EventSource {
       if (this.timeout > 0) {
         setTimeout(() => {
           if (this._xhr.readyState === XMLHttpRequest.LOADING) {
-            this.dispatch('error', {
-              type: 'timeout',
-            });
-
+            this.dispatch('error', { type: 'timeout' });
             this.close();
           }
         }, this.timeout);
@@ -157,6 +155,12 @@ class EventSource {
         message: e.message,
         error: e,
       });
+    }
+  }
+
+  _logDebug(...msg) {
+    if (this.debug) {
+      console.debug(...msg);
     }
   }
 
@@ -205,7 +209,7 @@ class EventSource {
     if (this.eventHandlers[type] === undefined) {
       this.eventHandlers[type] = [];
     }
-    
+
     this.eventHandlers[type].push(listener);
   }
 

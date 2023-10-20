@@ -185,13 +185,14 @@ new EventSource(url: string | URL, options?: EventSourceOptions);
 
 ```typescript
 const options: EventSourceOptions = {
-  method: 'GET'; // Request method. Default: GET
-  timeout: 0; // Time after which the connection will expire without any activity: Default: 0 (no timeout)
-  timeoutBeforeConnection: 500; // Time to wait before initial connection is made: Default: 500ms
-  headers: {}; // Your request headers. Default: {}
-  body: undefined; // Your request body sent on connection: Default: undefined
-  debug: false; // Show console.debug messages for debugging purpose. Default: false
-  pollingInterval: 5000; // Time (ms) between reconnections. Default: 5000
+  method: 'GET', // Request method. Default: GET
+  timeout: 0, // Time (ms) after which the connection will expire without any activity. Default: 0 (no timeout)
+  timeoutBeforeConnection: 500, // Time (ms) to wait before initial connection is made. Default: 500
+  withCredentials: false, // Include credentials in cross-site Access-Control requests. Default: false
+  headers: {}, // Your request headers. Default: {}
+  body: undefined, // Your request body sent on connection. Default: undefined
+  debug: false, // Show console.debug messages for debugging purpose. Default: false
+  pollingInterval: 5000, // Time (ms) between reconnections. If set to 0, reconnections will be disabled. Default: 5000
 }
 ```
 
