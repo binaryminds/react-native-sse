@@ -58,10 +58,9 @@ type BuiltInEventMap = {
   'error': ErrorEvent | TimeoutEvent | ExceptionEvent,
 };
 
-type ResolvedEvent<E extends string, T extends EventType<E>> = T extends BuiltInEventType ? BuiltInEventMap[T] : CustomEvent<T>;
-
+export type EventSourceEvent<E extends T, T extends string = any> = E extends BuiltInEventType ? BuiltInEventMap[E] : CustomEvent<E>;
 export type EventSourceListener<E extends string = never, T extends EventType<E> = EventType<E>> = (
-  event: ResolvedEvent<E, T>
+  event: EventSourceEvent<T>
 ) => void;
 
 declare class EventSource<E extends string = never> {
@@ -70,8 +69,8 @@ declare class EventSource<E extends string = never> {
   close(): void;
   addEventListener<T extends EventType<E>>(type: T, listener: EventSourceListener<E, T>): void;
   removeEventListener<T extends EventType<E>>(type: T, listener: EventSourceListener<E, T>): void;
-  removeAllEventListeners(type?: EventType<E>): void;
-  dispatch(type: EventType<E>, data: ResolvedEvent<E, any>): void;
+  removeAllEventListeners<T extends EventType<E>>(type?: T): void;
+  dispatch<T extends EventType<E>>(type: T, data: EventSourceEvent<T>): void;
 }
 
 export default EventSource;
