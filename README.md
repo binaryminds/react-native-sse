@@ -139,17 +139,19 @@ If you use Redux you can get the actual value directly from the store instance.
 
 ```typescript
 // full example: https://snack.expo.dev/@quiknull/react-native-sse-redux-example
-const Example: React.FC = () => {
-    const userName = useSelector((state: RootState) => state.user.name);
+type CustomEvents = "ping";
 
-    const pingHandler: EventSourceListener = useCallback(
+const Example: React.FC = () => {
+    const name = useSelector((state: RootState) => state.user.name);
+
+    const pingHandler: EventSourceListener<CustomEvents, 'ping'> = useCallback(
         (event) => {
             // In Event Source Listeners in connection with redux
             // you should read state directly from store object.
-            console.log("User name from component selector: ", userName); // bad
+            console.log("User name from component selector: ", name); // bad
             console.log("User name directly from store: ", store.getState().user.name); // good
         },
-        [userName]
+        []
     );
 
     useEffect(() => {
@@ -160,7 +162,7 @@ const Example: React.FC = () => {
             "https://example.com/my-private-topic"
         );
 
-        const es = new EventSource(url, {
+        const es = new EventSource<CustomEvents>(url, {
             headers: {
                 Authorization: {
                     toString: function () {
@@ -201,7 +203,7 @@ const options: EventSourceOptions = {
 Using EventSource you can handle custom events invoked by the server:
 
 ```typescript
-import EventSource from "react-native-sse";
+import EventSource, { EventSourceListener, EventSourceEvent } from "react-native-sse";
 
 type MyCustomEvents = "ping" | "clientConnected" | "clientDisconnected";
 
@@ -225,6 +227,57 @@ es.addEventListener("clientDisconnected", (event) => {
   console.log("Client disconnected:", event.data);
 });
 ```
+
+Using one listener for all events:
+
+```typescript
+import EventSource, { EventSourceListener } from "react-native-sse";
+
+type MyCustomEvents = "ping" | "clientConnected" | "clientDisconnected";
+
+const es = new EventSource<MyCustomEvents>(
+  "https://your-sse-server.com/.well-known/hub"
+);
+
+const listener: EventSourceListener<MyCustomEvents> = (event) => {
+  if (event.type === 'open') {
+    // connection opened
+  } else if (event.type === 'message') {
+    // ...
+  } else if (event.type === 'ping') {
+    // ...
+  }
+}
+es.addEventListener('open', listener);
+es.addEventListener('message', listener);
+es.addEventListener('ping', listener);
+```
+
+Using generic type for one event:
+
+```typescript
+import EventSource, { EventSourceListener, EventSourceEvent } from "react-native-sse";
+
+type MyCustomEvents = "ping" | "clientConnected" | "clientDisconnected";
+
+const es = new EventSource<MyCustomEvents>(
+  "https://your-sse-server.com/.well-known/hub"
+);
+
+const pingListener: EventSourceListener<MyCustomEvents, 'ping'> = (event) => {
+  // ...
+}
+// or
+const pingListener = (event: EventSourceEvent<'ping', MyCustomEvents>) => {
+  // ...
+}
+
+es.addEventListener('ping', pingListener);
+```
+
+`MyCustomEvents` in `EventSourceEvent` is optional, but it's recommended to use it in order to have better type checking.
+
+---
 
 Custom events always emit result with following interface:
 
