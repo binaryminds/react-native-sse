@@ -1,8 +1,5 @@
-export type EventType = 'open' | 'message' | 'error' | 'close';
-
-export interface BaseEvent {
-  type: string;
-}
+export type BuiltInEventType = 'open' | 'message' | 'error' | 'close';
+export type EventType<E extends string = never> = E | BuiltInEventType;
 
 export interface MessageEvent {
   type: 'message';
@@ -54,20 +51,26 @@ export interface EventSourceOptions {
   pollingInterval?: number;
 }
 
-export type EventSourceEvent = MessageEvent | OpenEvent | CloseEvent | TimeoutEvent | ErrorEvent | ExceptionEvent;
+type BuiltInEventMap = {
+  'message': MessageEvent,
+  'open': OpenEvent,
+  'close': CloseEvent,
+  'error': ErrorEvent | TimeoutEvent | ExceptionEvent,
+};
 
-export type EventSourceListener<E extends string = never> = (
-  event: CustomEvent<E> | EventSourceEvent
+export type EventSourceEvent<E extends T, T extends string = any> = E extends BuiltInEventType ? BuiltInEventMap[E] : CustomEvent<E>;
+export type EventSourceListener<E extends string = never, T extends EventType<E> = EventType<E>> = (
+  event: EventSourceEvent<T>
 ) => void;
 
 declare class EventSource<E extends string = never> {
   constructor(url: URL | string, options?: EventSourceOptions);
   open(): void;
   close(): void;
-  addEventListener(type: E | EventType, listener: EventSourceListener<E>): void;
-  removeEventListener(type: E | EventType, listener: EventSourceListener<E>): void;
-  removeAllEventListeners(type?: E | EventType): void;
-  dispatch(type: E | EventType, data: E | EventSourceEvent): void;
+  addEventListener<T extends EventType<E>>(type: T, listener: EventSourceListener<E, T>): void;
+  removeEventListener<T extends EventType<E>>(type: T, listener: EventSourceListener<E, T>): void;
+  removeAllEventListeners<T extends EventType<E>>(type?: T): void;
+  dispatch<T extends EventType<E>>(type: T, data: EventSourceEvent<T>): void;
 }
 
 export default EventSource;
