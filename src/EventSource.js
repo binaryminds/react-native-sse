@@ -177,9 +177,11 @@ class EventSource {
     const parts = response.substr(this.lastIndexProcessed).split('\n');
     
     const indexOfDoubleNewline = response.lastIndexOf('\n\n');
-    if (indexOfDoubleNewline != -1) {
-      this.lastIndexProcessed = indexOfDoubleNewline + 2;
+    if (indexOfDoubleNewline < 0) {
+      return;
     }
+
+    this.lastIndexProcessed = indexOfDoubleNewline + 2;
     
     let data = [];
     let retry = 0;
