@@ -177,7 +177,7 @@ class EventSource {
     const parts = response.substr(this.lastIndexProcessed).split('\n');
     
     const indexOfDoubleNewline = response.lastIndexOf('\n\n');
-    if (indexOfDoubleNewline < 0) {
+    if (indexOfDoubleNewline <= (this.lastIndexProcessed - 2)) {
       return;
     }
 
