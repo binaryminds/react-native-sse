@@ -262,13 +262,15 @@ class EventSource {
   }
 
   close() {
-    this.status = this.CLOSED;
+    if (this.status !== this.CLOSED) {
+      this.status = this.CLOSED;
+      this.dispatch('close', { type: 'close' });
+    }
+
     clearTimeout(this._pollTimer);
     if (this._xhr) {
       this._xhr.abort();
     }
-
-    this.dispatch('close', { type: 'close' });
   }
 }
 
