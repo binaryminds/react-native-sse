@@ -188,19 +188,19 @@ class EventSource {
     let line = '';
 
     for (let i = 0; i < parts.length; i++) {
-      line = parts[i].replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, '');
-      if (line.indexOf('event') === 0) {
+      line = parts[i].trim();
+      if (line.startsWith('event')) {
         type = line.replace(/event:?\s*/, '');
-      } else if (line.indexOf('retry') === 0) {
+      } else if (line.startsWith('retry')) {
         retry = parseInt(line.replace(/retry:?\s*/, ''), 10);
         if (!isNaN(retry)) {
           this.interval = retry;
         }
-      } else if (line.indexOf('data') === 0) {
+      } else if (line.startsWith('data')) {
         data.push(line.replace(/data:?\s*/, ''));
-      } else if (line.indexOf('id:') === 0) {
+      } else if (line.startsWith('id:')) {
         this.lastEventId = line.replace(/id:?\s*/, '');
-      } else if (line.indexOf('id') === 0) {
+      } else if (line.startsWith('id')) {
         this.lastEventId = null;
       } else if (line === '') {
         if (data.length > 0) {
