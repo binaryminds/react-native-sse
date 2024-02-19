@@ -15,7 +15,6 @@ class EventSource {
   constructor(url, options = {}) {
     this.lastEventId = null;
     this.lastIndexProcessed = 0;
-    this.eventType = undefined;
     this.status = this.CONNECTING;
 
     this.eventHandlers = {
@@ -183,6 +182,7 @@ class EventSource {
     const parts = response.substring(this.lastIndexProcessed, indexOfDoubleNewline).split('\n');
     this.lastIndexProcessed = indexOfDoubleNewline;
 
+    let type = undefined;
     let data = [];
     let retry = 0;
     let line = '';
@@ -190,7 +190,7 @@ class EventSource {
     for (let i = 0; i < parts.length; i++) {
       line = parts[i].replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, '');
       if (line.indexOf('event') === 0) {
-        this.eventType = line.replace(/event:?\s*/, '');
+        type = line.replace(/event:?\s*/, '');
       } else if (line.indexOf('retry') === 0) {
         retry = parseInt(line.replace(/retry:?\s*/, ''), 10);
         if (!isNaN(retry)) {
@@ -204,7 +204,7 @@ class EventSource {
         this.lastEventId = null;
       } else if (line === '') {
         if (data.length > 0) {
-          const eventType = this.eventType || 'message'
+          const eventType = type || 'message';
           const event = {
             type: eventType,
             data: data.join("\n"),
@@ -215,7 +215,7 @@ class EventSource {
           this.dispatch(eventType, event);
 
           data = [];
-          this.eventType = undefined;
+          type = undefined;
         }
       }
     }
