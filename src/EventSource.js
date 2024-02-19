@@ -34,6 +34,9 @@ class EventSource {
 
     this._xhr = null;
     this._pollTimer = null;
+    this._newlineChar = null;
+    this._doubleNewlineChar = null;
+    this._doubleNewlineLength = null;
     this._lastIndexProcessed = 0;
 
     if (!url || (typeof url !== 'string' && typeof url.toString !== 'function')) {
@@ -174,13 +177,25 @@ class EventSource {
   }
 
   _handleEvent(response) {
+    if (this._newlineChar === null) {
+      const detectedNewlineChar = this._detectNewlineChar(response);
+
+      if (detectedNewlineChar !== null) {
+        this._newlineChar = detectedNewlineChar;
+        this._doubleNewlineChar = detectedNewlineChar + detectedNewlineChar;
+        this._doubleNewlineLength = this._doubleNewlineChar.length;
+      } else {
+        return;
+      }
+    }
+
     const indexOfDoubleNewline = this._getLastDoubleNewlineIndex(response);
 
     if (indexOfDoubleNewline <= this._lastIndexProcessed) {
       return;
     }
 
-    const parts = response.substring(this._lastIndexProcessed, indexOfDoubleNewline).split('\n');
+    const parts = response.substring(this._lastIndexProcessed, indexOfDoubleNewline).split(this._newlineChar);
     this._lastIndexProcessed = indexOfDoubleNewline;
 
     let type = undefined;
@@ -222,12 +237,24 @@ class EventSource {
     }
   }
 
+  _detectNewlineChar(response) {
+    if (response.includes('\r\n')) {
+      return '\r\n';
+    } else if (response.includes('\r')) {
+      return '\r';
+    } else if (response.includes('\n')) {
+      return '\n';
+    } else {
+      return null;
+    }
+  }
+
   _getLastDoubleNewlineIndex(response) {
-    const lastIndex = response.lastIndexOf('\n\n');
+    const lastIndex = response.lastIndexOf(this._doubleNewlineChar);
     if (lastIndex === -1) {
       return -1;
     }
-    return lastIndex + 2;
+    return lastIndex + this._doubleNewlineLength;
   }
 
   addEventListener(type, listener) {
