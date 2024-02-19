@@ -14,7 +14,6 @@ class EventSource {
 
   constructor(url, options = {}) {
     this.lastEventId = null;
-    this.lastIndexProcessed = 0;
     this.status = this.CONNECTING;
 
     this.eventHandlers = {
@@ -35,6 +34,7 @@ class EventSource {
 
     this._xhr = null;
     this._pollTimer = null;
+    this._lastIndexProcessed = 0;
 
     if (!url || (typeof url !== 'string' && typeof url.toString !== 'function')) {
       throw new SyntaxError('[EventSource] Invalid URL argument.');
@@ -60,8 +60,9 @@ class EventSource {
 
   open() {
     try {
-      this.lastIndexProcessed = 0;
       this.status = this.CONNECTING;
+
+      this._lastIndexProcessed = 0;
 
       this._xhr = new XMLHttpRequest();
       this._xhr.open(this.method, this.url, true);
@@ -175,12 +176,12 @@ class EventSource {
   _handleEvent(response) {
     const indexOfDoubleNewline = this._getLastDoubleNewlineIndex(response);
 
-    if (indexOfDoubleNewline <= this.lastIndexProcessed) {
+    if (indexOfDoubleNewline <= this._lastIndexProcessed) {
       return;
     }
 
-    const parts = response.substring(this.lastIndexProcessed, indexOfDoubleNewline).split('\n');
-    this.lastIndexProcessed = indexOfDoubleNewline;
+    const parts = response.substring(this._lastIndexProcessed, indexOfDoubleNewline).split('\n');
+    this._lastIndexProcessed = indexOfDoubleNewline;
 
     let type = undefined;
     let data = [];
