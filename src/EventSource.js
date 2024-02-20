@@ -236,15 +236,13 @@ class EventSource {
   }
 
   _detectNewlineChar(response) {
-    if (response.includes('\r\n')) {
-      return '\r\n';
-    } else if (response.includes('\r')) {
-      return '\r';
-    } else if (response.includes('\n')) {
-      return '\n';
-    } else {
-      return null;
+    const supportedLineEndings = ['\r\n', '\n', '\r'];
+    for (const char of supportedLineEndings) {
+      if (response.includes(char)) {
+        return char;
+      }
     }
+    return null;
   }
 
   _getLastDoubleNewlineIndex(response) {
