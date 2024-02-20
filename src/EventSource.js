@@ -214,10 +214,8 @@ class EventSource {
         }
       } else if (line.startsWith('data')) {
         data.push(line.replace(/data:?\s*/, ''));
-      } else if (line.startsWith('id:')) {
-        this.lastEventId = line.replace(/id:?\s*/, '');
       } else if (line.startsWith('id')) {
-        this.lastEventId = null;
+        this.lastEventId = line.replace(/id:?\s*/, '');
       } else if (line === '') {
         if (data.length > 0) {
           const eventType = type || 'message';
