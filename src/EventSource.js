@@ -185,7 +185,9 @@ class EventSource {
         this._logDebug(`[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(detectedNewlineChar).slice(1, -1)}`)
         this.lineEndingCharacter = detectedNewlineChar;
       } else {
-        throw Error(`[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.`);
+        console.warn(`[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.`);
+        
+        return;
       }
     }
 
@@ -213,8 +215,10 @@ class EventSource {
         }
       } else if (line.startsWith('data')) {
         data.push(line.replace(/data:?\s*/, ''));
-      } else if (line.startsWith('id')) {
+      } else if (line.startsWith('id:')) {
         this.lastEventId = line.replace(/id:?\s*/, '');
+      } else if (line.startsWith('id')) {
+        this.lastEventId = null;
       } else if (line === '') {
         if (data.length > 0) {
           const eventType = type || 'message';
