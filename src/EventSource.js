@@ -174,13 +174,15 @@ class EventSource {
   }
 
   _handleEvent(response) {
-    const parts = response.substr(this.lastIndexProcessed).split('\n');
-    
-    const indexOfDoubleNewline = response.lastIndexOf('\n\n');
-    if (indexOfDoubleNewline != -1) {
-      this.lastIndexProcessed = indexOfDoubleNewline + 2;
+    const indexOfDoubleNewline = this._getLastDoubleNewlineIndex(response);
+
+    if (indexOfDoubleNewline <= this.lastIndexProcessed) {
+      return;
     }
-    
+
+    const parts = response.substring(this.lastIndexProcessed, indexOfDoubleNewline).split('\n');
+    this.lastIndexProcessed = indexOfDoubleNewline;
+
     let data = [];
     let retry = 0;
     let line = '';
@@ -217,6 +219,14 @@ class EventSource {
         }
       }
     }
+  }
+
+  _getLastDoubleNewlineIndex(response) {
+    const lastIndex = response.lastIndexOf('\n\n');
+    if (lastIndex === -1) {
+      return -1;
+    }
+    return lastIndex + 2;
   }
 
   addEventListener(type, listener) {
