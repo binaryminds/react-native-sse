@@ -12,6 +12,10 @@ class EventSource {
   OPEN = 1;
   CLOSED = 2;
 
+  CRLF = '\r\n';
+  LF = '\n';
+  CR = '\r';
+
   constructor(url, options = {}) {
     this.lastEventId = null;
     this.status = this.CONNECTING;
@@ -31,12 +35,10 @@ class EventSource {
     this.body = options.body || undefined;
     this.debug = options.debug || false;
     this.interval = options.pollingInterval ?? 5000;
+    this.lineEndingCharacter = options.lineEndingCharacter || null;
 
     this._xhr = null;
     this._pollTimer = null;
-    this._newlineChar = null;
-    this._doubleNewlineChar = null;
-    this._doubleNewlineLength = null;
     this._lastIndexProcessed = 0;
 
     if (!url || (typeof url !== 'string' && typeof url.toString !== 'function')) {
@@ -177,25 +179,22 @@ class EventSource {
   }
 
   _handleEvent(response) {
-    if (this._newlineChar === null) {
+    if (this.lineEndingCharacter === null) {
       const detectedNewlineChar = this._detectNewlineChar(response);
-
       if (detectedNewlineChar !== null) {
-        this._newlineChar = detectedNewlineChar;
-        this._doubleNewlineChar = detectedNewlineChar + detectedNewlineChar;
-        this._doubleNewlineLength = this._doubleNewlineChar.length;
+        this._logDebug(`[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(detectedNewlineChar).slice(1, -1)}`)
+        this.lineEndingCharacter = detectedNewlineChar;
       } else {
-        return;
+        throw Error(`[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.`);
       }
     }
 
     const indexOfDoubleNewline = this._getLastDoubleNewlineIndex(response);
-
     if (indexOfDoubleNewline <= this._lastIndexProcessed) {
       return;
     }
 
-    const parts = response.substring(this._lastIndexProcessed, indexOfDoubleNewline).split(this._newlineChar);
+    const parts = response.substring(this._lastIndexProcessed, indexOfDoubleNewline).split(this.lineEndingCharacter);
     this._lastIndexProcessed = indexOfDoubleNewline;
 
     let type = undefined;
@@ -236,7 +235,7 @@ class EventSource {
   }
 
   _detectNewlineChar(response) {
-    const supportedLineEndings = ['\r\n', '\n', '\r'];
+    const supportedLineEndings = [this.CRLF, this.LF, this.CR];
     for (const char of supportedLineEndings) {
       if (response.includes(char)) {
         return char;
@@ -246,11 +245,13 @@ class EventSource {
   }
 
   _getLastDoubleNewlineIndex(response) {
-    const lastIndex = response.lastIndexOf(this._doubleNewlineChar);
+    const doubleLineEndingCharacter = this.lineEndingCharacter + this.lineEndingCharacter;
+    const lastIndex = response.lastIndexOf(doubleLineEndingCharacter);
     if (lastIndex === -1) {
       return -1;
     }
-    return lastIndex + this._doubleNewlineLength;
+    
+    return lastIndex + doubleLineEndingCharacter.length;
   }
 
   addEventListener(type, listener) {

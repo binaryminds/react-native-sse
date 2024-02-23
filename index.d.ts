@@ -49,6 +49,7 @@ export interface EventSourceOptions {
   body?: any;
   debug?: boolean;
   pollingInterval?: number;
+  lineEndingCharacter?: string;
 }
 
 type BuiltInEventMap = {
