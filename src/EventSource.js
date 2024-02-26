@@ -182,11 +182,10 @@ class EventSource {
     if (this.lineEndingCharacter === null) {
       const detectedNewlineChar = this._detectNewlineChar(response);
       if (detectedNewlineChar !== null) {
-        this._logDebug(`[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(detectedNewlineChar).slice(1, -1)}`)
+        this._logDebug(`[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(detectedNewlineChar).slice(1, -1)}`);
         this.lineEndingCharacter = detectedNewlineChar;
       } else {
-        console.warn(`[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.`);
-        
+        console.warn("[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.");
         return;
       }
     }
@@ -228,7 +227,7 @@ class EventSource {
           const eventType = type || 'message';
           const event = {
             type: eventType,
-            data: data.join("\n"),
+            data: data.join('\n'),
             url: this.url,
             lastEventId: this.lastEventId,
           };
@@ -258,7 +257,7 @@ class EventSource {
     if (lastIndex === -1) {
       return -1;
     }
-    
+
     return lastIndex + doubleLineEndingCharacter.length;
   }
 
