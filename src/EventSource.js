@@ -200,6 +200,7 @@ class EventSource {
     this._lastIndexProcessed = indexOfDoubleNewline;
 
     let type = undefined;
+    let id = null;
     let data = [];
     let retry = 0;
     let line = '';
@@ -215,10 +216,13 @@ class EventSource {
         }
       } else if (line.startsWith('data')) {
         data.push(line.replace(/data:?\s*/, ''));
-      } else if (line.startsWith('id:')) {
-        this.lastEventId = line.replace(/id:?\s*/, '');
       } else if (line.startsWith('id')) {
-        this.lastEventId = null;
+        id = line.replace(/id:?\s*/, '');
+        if (id !== '') {
+          this.lastEventId = id;
+        } else {
+          this.lastEventId = null;
+        }
       } else if (line === '') {
         if (data.length > 0) {
           const eventType = type || 'message';
