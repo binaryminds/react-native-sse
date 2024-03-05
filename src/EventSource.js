@@ -12,10 +12,12 @@ class EventSource {
   OPEN = 1;
   CLOSED = 2;
 
+  CRLF = '\r\n';
+  LF = '\n';
+  CR = '\r';
+
   constructor(url, options = {}) {
     this.lastEventId = null;
-    this.lastIndexProcessed = 0;
-    this.eventType = undefined;
     this.status = this.CONNECTING;
 
     this.eventHandlers = {
@@ -33,9 +35,11 @@ class EventSource {
     this.body = options.body || undefined;
     this.debug = options.debug || false;
     this.interval = options.pollingInterval ?? 5000;
+    this.lineEndingCharacter = options.lineEndingCharacter || null;
 
     this._xhr = null;
     this._pollTimer = null;
+    this._lastIndexProcessed = 0;
 
     if (!url || (typeof url !== 'string' && typeof url.toString !== 'function')) {
       throw new SyntaxError('[EventSource] Invalid URL argument.');
@@ -61,8 +65,9 @@ class EventSource {
 
   open() {
     try {
-      this.lastIndexProcessed = 0;
       this.status = this.CONNECTING;
+
+      this._lastIndexProcessed = 0;
 
       this._xhr = new XMLHttpRequest();
       this._xhr.open(this.method, this.url, true);
@@ -174,40 +179,55 @@ class EventSource {
   }
 
   _handleEvent(response) {
-    const indexOfDoubleNewline = this._getLastDoubleNewlineIndex(response);
+    if (this.lineEndingCharacter === null) {
+      const detectedNewlineChar = this._detectNewlineChar(response);
+      if (detectedNewlineChar !== null) {
+        this._logDebug(`[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(detectedNewlineChar).slice(1, -1)}`);
+        this.lineEndingCharacter = detectedNewlineChar;
+      } else {
+        console.warn("[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.");
+        return;
+      }
+    }
 
-    if (indexOfDoubleNewline <= this.lastIndexProcessed) {
+    const indexOfDoubleNewline = this._getLastDoubleNewlineIndex(response);
+    if (indexOfDoubleNewline <= this._lastIndexProcessed) {
       return;
     }
 
-    const parts = response.substring(this.lastIndexProcessed, indexOfDoubleNewline).split('\n');
-    this.lastIndexProcessed = indexOfDoubleNewline;
+    const parts = response.substring(this._lastIndexProcessed, indexOfDoubleNewline).split(this.lineEndingCharacter);
+    this._lastIndexProcessed = indexOfDoubleNewline;
 
+    let type = undefined;
+    let id = null;
     let data = [];
     let retry = 0;
     let line = '';
 
     for (let i = 0; i < parts.length; i++) {
-      line = parts[i].replace(/^(\s|\u00A0)+|(\s|\u00A0)+$/g, '');
-      if (line.indexOf('event') === 0) {
-        this.eventType = line.replace(/event:?\s*/, '');
-      } else if (line.indexOf('retry') === 0) {
+      line = parts[i].trim();
+      if (line.startsWith('event')) {
+        type = line.replace(/event:?\s*/, '');
+      } else if (line.startsWith('retry')) {
         retry = parseInt(line.replace(/retry:?\s*/, ''), 10);
         if (!isNaN(retry)) {
           this.interval = retry;
         }
-      } else if (line.indexOf('data') === 0) {
+      } else if (line.startsWith('data')) {
         data.push(line.replace(/data:?\s*/, ''));
-      } else if (line.indexOf('id:') === 0) {
-        this.lastEventId = line.replace(/id:?\s*/, '');
-      } else if (line.indexOf('id') === 0) {
-        this.lastEventId = null;
+      } else if (line.startsWith('id')) {
+        id = line.replace(/id:?\s*/, '');
+        if (id !== '') {
+          this.lastEventId = id;
+        } else {
+          this.lastEventId = null;
+        }
       } else if (line === '') {
         if (data.length > 0) {
-          const eventType = this.eventType || 'message'
+          const eventType = type || 'message';
           const event = {
             type: eventType,
-            data: data.join("\n"),
+            data: data.join('\n'),
             url: this.url,
             lastEventId: this.lastEventId,
           };
@@ -215,18 +235,30 @@ class EventSource {
           this.dispatch(eventType, event);
 
           data = [];
-          this.eventType = undefined;
+          type = undefined;
         }
       }
     }
   }
 
+  _detectNewlineChar(response) {
+    const supportedLineEndings = [this.CRLF, this.LF, this.CR];
+    for (const char of supportedLineEndings) {
+      if (response.includes(char)) {
+        return char;
+      }
+    }
+    return null;
+  }
+
   _getLastDoubleNewlineIndex(response) {
-    const lastIndex = response.lastIndexOf('\n\n');
+    const doubleLineEndingCharacter = this.lineEndingCharacter + this.lineEndingCharacter;
+    const lastIndex = response.lastIndexOf(doubleLineEndingCharacter);
     if (lastIndex === -1) {
       return -1;
     }
-    return lastIndex + 2;
+
+    return lastIndex + doubleLineEndingCharacter.length;
   }
 
   addEventListener(type, listener) {
