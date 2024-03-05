@@ -12,9 +12,12 @@
   },
   "keywords": [
     "react-native",
+    "expo",
     "event-source",
     "sse",
     "server-sent-events",
+    "chatgpt",
+    "stream",
     "ios",
     "android"
   ],

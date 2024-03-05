@@ -278,6 +278,80 @@ es.addEventListener('ping', pingListener);
 
 `MyCustomEvents` in `EventSourceEvent` is optional, but it's recommended to use it in order to have better type checking.
 
+## 🚀 Usage with ChatGPT
+
+If you want to use ChatGPT with React Native, you can use the following example:
+
+```typescript
+import { useEffect, useState } from "react";
+import { Text, View } from "react-native";
+import EventSource from "react-native-sse";
+
+const OpenAIToken = '[Your OpenAI token]';
+
+export default function App() {
+  const [text, setText] = useState<string>("Loading...");
+
+  useEffect(() => {
+    const es = new EventSource(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OpenAIToken}`,
+        },
+        method: "POST",
+        // Remember to read the OpenAI API documentation to set the correct body
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo-0125",
+          messages: [
+            {
+              role: "system",
+              content: "You are a helpful assistant.",
+            },
+            {
+              role: "user",
+              content: "What is the meaning of life?",
+            },
+          ],
+          max_tokens: 600,
+          n: 1,
+          temperature: 0.7,
+          stream: true,
+        }),
+        pollingInterval: 0, // Remember to set pollingInterval to 0 to disable reconnections
+      }
+    );
+
+    es.addEventListener("open", () => {
+      setText("");
+    });
+
+    es.addEventListener("message", (event) => {
+      if (event.data !== "[DONE]") {
+        const data = JSON.parse(event.data);
+
+        if (data.choices[0].delta.content !== undefined) {
+          setText((text) => text + data.choices[0].delta.content);
+        }
+      }
+    });
+
+    return () => {
+      es.removeAllEventListeners();
+      es.close();
+    };
+  }, []);
+
+  return (
+    <View>
+      <Text>{text}</Text>
+    </View>
+  );
+}
+```
+
+
 ---
 
 Custom events always emit result with following interface:
