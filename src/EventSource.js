@@ -77,8 +77,6 @@ class EventSource {
       }
 
       this._xhr.setRequestHeader('Accept', 'text/event-stream');
-      this._xhr.setRequestHeader('Cache-Control', 'no-cache');
-      this._xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
       if (this.headers) {
         for (const [key, value] of Object.entries(this.headers)) {
