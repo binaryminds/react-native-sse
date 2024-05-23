@@ -6,6 +6,8 @@ const XMLReadyStateMap = [
   'DONE',
 ];
 
+const allowedMethods = ['onopen', 'onmessage', 'onerror'];
+
 class EventSource {
   ERROR = -1;
   CONNECTING = 0;
@@ -293,6 +295,12 @@ class EventSource {
 
   dispatch(type, data) {
     const availableTypes = Object.keys(this.eventHandlers);
+
+    const key = `on${type}`;
+    const callback = this[key];
+    if(typeof callback === 'function' && allowedMethods.includes(key)) {
+      callback(data);
+    }
 
     if (!availableTypes.includes(type)) {
       return;
