@@ -210,7 +210,7 @@ class EventSource {
         this.lineEndingCharacter = detectedNewlineChar;
       } else {
         console.warn(
-          '[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.'
+          "[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option."
         );
         return;
       }
