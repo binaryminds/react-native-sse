@@ -63,7 +63,8 @@ es.addEventListener("close", (event) => {
 ### Done vs Close
 
 `done` events will fire when server closes the connection.
-Reconnections will occur indefinitely, unless this behavior is disabled.
+By default, the client will automatically reconnect when this happens.
+You can disable reconnections by setting the `pollingInterval` option to `0`.
 `close` events will fire when the connection is terminated by the client, using `.close()`.
 
 ### Headers and params
