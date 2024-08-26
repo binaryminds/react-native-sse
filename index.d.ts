@@ -50,6 +50,7 @@ export interface EventSourceOptions {
   debug?: boolean;
   pollingInterval?: number;
   lineEndingCharacter?: string;
+  reconnectOnActive?: boolean; 
 }
 
 type BuiltInEventMap = {

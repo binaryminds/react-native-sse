@@ -196,6 +196,7 @@ const options: EventSourceOptions = {
   debug: false, // Show console.debug messages for debugging purpose. Default: false
   pollingInterval: 5000, // Time (ms) between reconnections. If set to 0, reconnections will be disabled. Default: 5000
   lineEndingCharacter: null // Character(s) used to represent line endings in received data. Common values: '\n' for LF (Unix/Linux), '\r\n' for CRLF (Windows), '\r' for CR (older Mac). Default: null (Automatically detect from event)
+  reconnectOnActive: true, // Automatically reconnect when the app becomes active (e.g., after being in the background) Default
 }
 ```
 
