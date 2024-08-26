@@ -44,15 +44,11 @@ class EventSource {
     this._pollTimer = null;
     this._lastIndexProcessed = 0;
 
-    this._isActive = true;
-
     this._appStateSubscription = null;
     this._setupAppStateListener();
 
-    if (
-      !url ||
-      (typeof url !== 'string' && typeof url.toString !== 'function')
-    ) {
+
+    if (!url || (typeof url !== 'string' && typeof url.toString !== 'function')) {
       throw new SyntaxError('[EventSource] Invalid URL argument.');
     }
 
@@ -132,17 +128,9 @@ class EventSource {
 
         const xhr = this._xhr;
 
-        this._logDebug(
-          `[EventSource][onreadystatechange] ReadyState: ${
-            XMLReadyStateMap[xhr.readyState] || 'Unknown'
-          }(${xhr.readyState}), status: ${xhr.status}`
-        );
+        this._logDebug(`[EventSource][onreadystatechange] ReadyState: ${XMLReadyStateMap[xhr.readyState] || 'Unknown'}(${xhr.readyState}), status: ${xhr.status}`);
 
-        if (
-          ![XMLHttpRequest.DONE, XMLHttpRequest.LOADING].includes(
-            xhr.readyState
-          )
-        ) {
+        if (![XMLHttpRequest.DONE, XMLHttpRequest.LOADING].includes(xhr.readyState)) {
           return;
         }
 
@@ -150,17 +138,13 @@ class EventSource {
           if (this.status === this.CONNECTING) {
             this.status = this.OPEN;
             this.dispatch('open', { type: 'open' });
-            this._logDebug(
-              '[EventSource][onreadystatechange][OPEN] Connection opened.'
-            );
+            this._logDebug('[EventSource][onreadystatechange][OPEN] Connection opened.');
           }
 
           this._handleEvent(xhr.responseText || '');
 
           if (xhr.readyState === XMLHttpRequest.DONE) {
-            this._logDebug(
-              '[EventSource][onreadystatechange][DONE] Operation done.'
-            );
+            this._logDebug('[EventSource][onreadystatechange][DONE] Operation done.');
             this._pollAgain(this.interval, false);
           }
         } else if (xhr.status !== 0) {
@@ -173,9 +157,7 @@ class EventSource {
           });
 
           if (xhr.readyState === XMLHttpRequest.DONE) {
-            this._logDebug(
-              '[EventSource][onreadystatechange][ERROR] Response status error.'
-            );
+            this._logDebug('[EventSource][onreadystatechange][ERROR] Response status error.');
             this._pollAgain(this.interval, false);
           }
         }
@@ -229,16 +211,10 @@ class EventSource {
     if (this.lineEndingCharacter === null) {
       const detectedNewlineChar = this._detectNewlineChar(response);
       if (detectedNewlineChar !== null) {
-        this._logDebug(
-          `[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(
-            detectedNewlineChar
-          ).slice(1, -1)}`
-        );
+        this._logDebug(`[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(detectedNewlineChar).slice(1, -1)}`);
         this.lineEndingCharacter = detectedNewlineChar;
       } else {
-        console.warn(
-          '[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the "lineEndingCharacter" option.'
-        );
+        console.warn("[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.");
         return;
       }
     }
@@ -248,9 +224,7 @@ class EventSource {
       return;
     }
 
-    const parts = response
-      .substring(this._lastIndexProcessed, indexOfDoubleNewline)
-      .split(this.lineEndingCharacter);
+    const parts = response.substring(this._lastIndexProcessed, indexOfDoubleNewline).split(this.lineEndingCharacter);
     this._lastIndexProcessed = indexOfDoubleNewline;
 
     let type = undefined;
@@ -307,8 +281,7 @@ class EventSource {
   }
 
   _getLastDoubleNewlineIndex(response) {
-    const doubleLineEndingCharacter =
-      this.lineEndingCharacter + this.lineEndingCharacter;
+    const doubleLineEndingCharacter = this.lineEndingCharacter + this.lineEndingCharacter;
     const lastIndex = response.lastIndexOf(doubleLineEndingCharacter);
     if (lastIndex === -1) {
       return -1;
@@ -327,9 +300,7 @@ class EventSource {
 
   removeEventListener(type, listener) {
     if (this.eventHandlers[type] !== undefined) {
-      this.eventHandlers[type] = this.eventHandlers[type].filter(
-        (handler) => handler !== listener
-      );
+      this.eventHandlers[type] = this.eventHandlers[type].filter((handler) => handler !== listener);
     }
   }
 
@@ -342,9 +313,7 @@ class EventSource {
       }
     } else {
       if (!availableTypes.includes(type)) {
-        throw Error(
-          `[EventSource] '${type}' type is not supported event type.`
-        );
+        throw Error(`[EventSource] '${type}' type is not supported event type.`);
       }
 
       this.eventHandlers[type] = [];
@@ -366,7 +335,6 @@ class EventSource {
   close() {
     if (this.status !== this.CLOSED) {
       this.status = this.CLOSED;
-      this._isActive = false;
       this.dispatch('close', { type: 'close' });
     }
 
