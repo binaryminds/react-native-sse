@@ -113,7 +113,7 @@ class EventSource {
         if (xhr.status >= 200 && xhr.status < 400) {
           if (this.status === this.CONNECTING) {
             this.status = this.OPEN;
-            this.dispatch('open', { type: 'open' });
+            this.dispatch('open', { type: 'open', responseHeaders: xhr.responseHeaders });
             this._logDebug('[EventSource][onreadystatechange][OPEN] Connection opened.');
           }
 
