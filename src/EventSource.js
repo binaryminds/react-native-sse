@@ -228,7 +228,7 @@ class EventSource {
           this.interval = retry;
         }
       } else if (line.startsWith('data')) {
-        data.push(line.replace(/data:?\s*/, ''));
+        data.push(line.replace(/data:?\s/, ''));
       } else if (line.startsWith('id')) {
         id = line.replace(/id:?\s*/, '');
         if (id !== '') {
