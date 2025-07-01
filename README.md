@@ -51,10 +51,23 @@ es.addEventListener("error", (event) => {
   }
 });
 
+es.addEventListener("done", (event) => {
+  console.log("Done SSE connection.");
+});
+
 es.addEventListener("close", (event) => {
   console.log("Close SSE connection.");
 });
 ```
+
+### Done vs Close
+
+`done` events will fire when server closes the connection.
+By default, the client will automatically reconnect when this happens.
+You can disable reconnections by setting the `pollingInterval` option to `0`.
+`close` events will fire when the connection is terminated by the client, using `.close()`.
+
+### Headers and params
 
 If you want to use Bearer token and/or topics, look at this example (TypeScript):
 

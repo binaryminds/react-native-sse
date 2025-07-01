@@ -1,4 +1,4 @@
-export type BuiltInEventType = 'open' | 'message' | 'error' | 'close';
+export type BuiltInEventType = 'open' | 'message' | 'error' | 'done' | 'close';
 export type EventType<E extends string = never> = E | BuiltInEventType;
 
 export interface MessageEvent {
@@ -10,6 +10,10 @@ export interface MessageEvent {
 
 export interface OpenEvent {
   type: 'open';
+}
+
+export interface DoneEvent {
+  type: 'done';
 }
 
 export interface CloseEvent {
@@ -55,6 +59,7 @@ export interface EventSourceOptions {
 type BuiltInEventMap = {
   'message': MessageEvent,
   'open': OpenEvent,
+  'done': DoneEvent,
   'close': CloseEvent,
   'error': ErrorEvent | TimeoutEvent | ExceptionEvent,
 };
