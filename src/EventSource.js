@@ -1,10 +1,4 @@
-const XMLReadyStateMap = [
-  'UNSENT',
-  'OPENED',
-  'HEADERS_RECEIVED',
-  'LOADING',
-  'DONE',
-];
+const XMLReadyStateMap = ['UNSENT', 'OPENED', 'HEADERS_RECEIVED', 'LOADING', 'DONE'];
 
 class EventSource {
   ERROR = -1;
@@ -44,7 +38,7 @@ class EventSource {
 
     this.headers = {
       ...defaultHeaders,
-     ...options.headers
+      ...options.headers,
     };
 
     this._xhr = null;
@@ -87,7 +81,9 @@ class EventSource {
       }
 
       for (const [key, value] of Object.entries(this.headers)) {
-        if(value) this._xhr.setRequestHeader(key, value);
+        if (value !== undefined && value !== null) {
+          this._xhr.setRequestHeader(key, value);
+        }
       }
 
       if (this.lastEventId !== null) {
@@ -103,7 +99,11 @@ class EventSource {
 
         const xhr = this._xhr;
 
-        this._logDebug(`[EventSource][onreadystatechange] ReadyState: ${XMLReadyStateMap[xhr.readyState] || 'Unknown'}(${xhr.readyState}), status: ${xhr.status}`);
+        this._logDebug(
+          `[EventSource][onreadystatechange] ReadyState: ${XMLReadyStateMap[xhr.readyState] || 'Unknown'}(${
+            xhr.readyState
+          }), status: ${xhr.status}`,
+        );
 
         if (![XMLHttpRequest.DONE, XMLHttpRequest.LOADING].includes(xhr.readyState)) {
           return;
@@ -186,10 +186,17 @@ class EventSource {
     if (this.lineEndingCharacter === null) {
       const detectedNewlineChar = this._detectNewlineChar(response);
       if (detectedNewlineChar !== null) {
-        this._logDebug(`[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(detectedNewlineChar).slice(1, -1)}`);
+        this._logDebug(
+          `[EventSource] Automatically detected lineEndingCharacter: ${JSON.stringify(detectedNewlineChar).slice(
+            1,
+            -1,
+          )}`,
+        );
         this.lineEndingCharacter = detectedNewlineChar;
       } else {
-        console.warn("[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.");
+        console.warn(
+          "[EventSource] Unable to identify the line ending character. Ensure your server delivers a standard line ending character: \\r\\n, \\n, \\r, or specify your custom character using the 'lineEndingCharacter' option.",
+        );
         return;
       }
     }
